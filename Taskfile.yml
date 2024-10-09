@@ -1,2 +1,14 @@
 version: '3'
 
+tasks:
+  build:
+    cmd: go build -o ./out/server
+  run:
+    cmd: task build && ./out/server
+  # add commit message as parameter
+  # needs PAT https://[PAT]@github.com/Cassanl/HotelRes.git
+  vcs: 
+    cmds:
+      - git add .
+      - git commit -m "update"
+      - git push -u https://github.com/Cassanl/HotelRes.git main
