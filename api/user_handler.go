@@ -1,7 +1,11 @@
 package api
 
 import (
+	"context"
+	"fmt"
 	"hoteRes/db"
+	"hoteRes/types"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -16,15 +20,27 @@ func NewUserHandler(userStore db.UserStore) *UserHandler {
 	}
 }
 
-func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
-	id := c.Params("id")
-	user, err := h.userStore.GetUserById(id)
+func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
+	var (
+		id  = c.Params("id")
+		ctx = context.Background()
+	)
+	user, err := h.userStore.GetUserById(ctx, id)
 	if err != nil {
 		return err
 	}
 	return c.JSON(user)
 }
 
-func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
+func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
 	return c.JSON("pol")
+}
+
+func (h *UserHandler) HandleInsertUser(c *fiber.Ctx) error {
+	var user types.User
+	if err := c.BodyParser(&user); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(user)
+	return nil
 }

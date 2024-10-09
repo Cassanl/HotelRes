@@ -1,6 +1,6 @@
 module hoteRes
 
-go 1.23.1
+go 1.22.7
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
