@@ -1,10 +1,15 @@
 version: '3'
 
 tasks:
+  # separate bin format
   build:
-    cmd: go build -o ./out/server
+    cmds: 
+    - go build -o ./out/server.exe
   run:
-    cmd: task build && ./out/server
+    cmds:
+    - task: build
+    - ./out/server.exe
+  
   # add commit message as parameter
   # needs PAT https://[PAT]@github.com/Cassanl/HotelRes.git
   vcs: 
