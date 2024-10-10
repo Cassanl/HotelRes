@@ -47,14 +47,13 @@ func (s *MongoUserStore) GetUsers(ctx context.Context) ([]*types.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	var users []*types.User
-	if err := cur.Decode(&users); err != nil {
-		return []*types.User{}, err
+	var users []*types.User // "cannot decode document into []*types.User"
+	if err := cur.All(ctx, &users); err != nil {
+		return []*types.User{}, nil
 	}
 	return users, nil
 }
 
-// TODO
 func (s *MongoUserStore) InsertUser(ctx context.Context, user *types.User) (*types.User, error) {
 	res, err := s.coll.InsertOne(ctx, user)
 	if err != nil {
