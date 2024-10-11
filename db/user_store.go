@@ -12,9 +12,13 @@ import (
 const userColl = "users"
 
 type UserStore interface {
+	Dropper
+
 	GetUserById(context.Context, string) (*types.User, error)
 	GetUsers(context.Context) ([]*types.User, error)
 	InsertUser(context.Context, *types.User) (*types.User, error)
+	DeleteUser(context.Context, string) error
+	UpdateUser(context.Context, string, types.UpdateUserParams) error
 }
 
 type MongoUserStore struct {
@@ -22,10 +26,10 @@ type MongoUserStore struct {
 	coll   *mongo.Collection
 }
 
-func NewMongoUserStore(c *mongo.Client) *MongoUserStore {
+func NewMongoUserStore(c *mongo.Client, dbName string) *MongoUserStore {
 	return &MongoUserStore{
 		client: c,
-		coll:   c.Database(DBNAME).Collection(userColl),
+		coll:   c.Database(dbName).Collection(userColl),
 	}
 }
 
@@ -47,7 +51,7 @@ func (s *MongoUserStore) GetUsers(ctx context.Context) ([]*types.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	var users []*types.User // "cannot decode document into []*types.User"
+	var users []*types.User
 	if err := cur.All(ctx, &users); err != nil {
 		return []*types.User{}, nil
 	}
@@ -61,4 +65,41 @@ func (s *MongoUserStore) InsertUser(ctx context.Context, user *types.User) (*typ
 	}
 	user.ID = res.InsertedID.(primitive.ObjectID)
 	return user, nil
+}
+
+func (s *MongoUserStore) DeleteUser(ctx context.Context, id string) error {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	res, err := s.coll.DeleteOne(ctx, bson.M{"_id": oid})
+	if err != nil {
+		return err
+	}
+	_ = res //TODO whe could handle the case when the use is not deleted (res == 0)
+	return nil
+}
+
+func (s *MongoUserStore) UpdateUser(
+	ctx context.Context,
+	id string,
+	updateValues types.UpdateUserParams) error {
+
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	update := bson.D{{Key: "$set", Value: updateValues.ToBson()}}
+	res, err := s.coll.UpdateOne(ctx, bson.M{"_id": oid}, update)
+	if err != nil {
+		return err
+	}
+	_ = res //TODO could check results to see if db documents are modified or not
+	return nil
+}
+
+func (s *MongoUserStore) Drop(ctx context.Context) error {
+	// drop user collection
+	return nil
 }

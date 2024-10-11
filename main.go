@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"hoteRes/api"
 	"hoteRes/db"
@@ -17,6 +18,9 @@ const dburi = "mongodb://localhost:27017"
 
 var withConf = fiber.Config{
 	ErrorHandler: func(c *fiber.Ctx, err error) error {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return c.JSON(map[string]string{"error": "no match"})
+		}
 		return c.JSON(map[string]string{"error": err.Error()})
 	},
 }
@@ -36,7 +40,7 @@ func main() {
 	apiv1 := app.Group("/api/v1")
 	apiv1.Get("/ping", handlePing)
 
-	userStore := db.NewMongoUserStore(mongo)
+	userStore := db.NewMongoUserStore(mongo, db.DBNAME)
 	userHandler := api.NewUserHandler(userStore)
 	// registerUserEndpoints(apiv1, *userHandler)
 
@@ -44,6 +48,8 @@ func main() {
 	apiv1User.Get("/", userHandler.HandleGetUsers)
 	apiv1User.Get("/:id", userHandler.HandleGetUser)
 	apiv1User.Post("/", userHandler.HandlePostUser)
+	apiv1User.Put("/:id", userHandler.HandlePutUser)
+	apiv1User.Delete("/:id", userHandler.HandleDeleteUser)
 
 	app.Listen(*listenAddr)
 }

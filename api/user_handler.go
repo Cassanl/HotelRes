@@ -52,3 +52,25 @@ func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 	}
 	return c.JSON(insertedUser)
 }
+
+func (h *UserHandler) HandleDeleteUser(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if err := h.userStore.DeleteUser(c.Context(), id); err != nil {
+		return err
+	}
+	return c.JSON(map[string]string{"deleted": id})
+}
+
+func (h *UserHandler) HandlePutUser(c *fiber.Ctx) error {
+	var (
+		updateValues types.UpdateUserParams
+		id           = c.Params("id")
+	)
+	if err := c.BodyParser(&updateValues); err != nil {
+		return err
+	}
+	if err := h.userStore.UpdateUser(c.Context(), id, updateValues); err != nil {
+		return err
+	}
+	return c.JSON(map[string]string{"updated": id})
+}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/mail"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -22,22 +23,55 @@ type CreateUserParams struct {
 	Password  string `json:"password"`
 }
 
-func (params CreateUserParams) Validate() []string {
-	errs := []string{}
+func NewUserFromParams(params CreateUserParams) (*User, error) {
+	encpw, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcryptCost)
+	if err != nil {
+		return nil, err
+	}
+	return &User{
+		FirstName:         params.FirstName,
+		LastName:          params.LastName,
+		Email:             params.Email,
+		EncryptedPassword: string(encpw),
+	}, nil
+}
+
+func (params CreateUserParams) Validate() map[string]string {
+	errs := map[string]string{}
 	if len(params.FirstName) < minFirstNameLen {
-		errs = append(errs, fmt.Sprintf("invalid FirstName : required lenth is  %d", minFirstNameLen))
+		errs["firstName"] = fmt.Sprintf("invalid FirstName : required lenth is  %d", minFirstNameLen)
 	}
 	if len(params.LastName) < minLastNameLen {
-		errs = append(errs, fmt.Sprintf("invalid LastName : required lenth is  %d", minLastNameLen))
+		errs["lastName"] = fmt.Sprintf("invalid LastName : required lenth is  %d", minLastNameLen)
 	}
 	if len(params.Password) < minPasswordLen {
-		errs = append(errs, fmt.Sprintf("invalid Password : required lenth is  %d", minPasswordLen))
+		errs["password"] = fmt.Sprintf("invalid Password : required lenth is  %d", minPasswordLen)
 	}
 	if _, err := mail.ParseAddress(params.Email); err != nil {
-		errs = append(errs, "invalid email address")
+		errs["email"] = "invalid email address"
 	}
 	return errs
 }
+
+type UpdateUserParams struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}
+
+func (params UpdateUserParams) ToBson() bson.M {
+	result := bson.M{}
+	if len(params.FirstName) > 0 {
+		result["firstName"] = params.FirstName
+	}
+	if len(params.LastName) > 0 {
+		result["lastName"] = params.LastName
+	}
+	return result
+}
+
+type UpdateUserPassword string
+
+type UpdateUserEmail string
 
 type User struct {
 	ID                primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
@@ -56,16 +90,3 @@ type User struct {
 // 	CreatedAt         time.Time
 // 	UpdatedAt         time.Time
 // }
-
-func NewUserFromParams(params CreateUserParams) (*User, error) {
-	encpw, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcryptCost)
-	if err != nil {
-		return nil, err
-	}
-	return &User{
-		FirstName:         params.FirstName,
-		LastName:          params.LastName,
-		Email:             params.Email,
-		EncryptedPassword: string(encpw),
-	}, nil
-}
