@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"hoteRes/types"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -14,7 +15,7 @@ const roomColl = "rooms"
 type RoomStore interface {
 	Dropper
 
-	InsertHotel(context.Context, *types.Room) (*types.Room, error)
+	InsertRoom(context.Context, *types.Room) (*types.Room, error)
 }
 
 type MongoRoomStore struct {
@@ -24,10 +25,11 @@ type MongoRoomStore struct {
 	HotelStore
 }
 
-func NewMongoRoomStore(c *mongo.Client, dbName string) *MongoRoomStore {
+func NewMongoRoomStore(c *mongo.Client, dbName string, hs HotelStore) *MongoRoomStore {
 	return &MongoRoomStore{
-		client: c,
-		coll:   c.Database(dbName).Collection(roomColl),
+		client:     c,
+		coll:       c.Database(dbName).Collection(roomColl),
+		HotelStore: hs,
 	}
 }
 
@@ -38,9 +40,7 @@ func (s *MongoRoomStore) InsertRoom(ctx context.Context, room *types.Room) (*typ
 	}
 	room.ID = res.InsertedID.(primitive.ObjectID)
 
-	// TODO
-
-	s.HotelStore.Update(ctx, room.HotelID.Hex(), nil)
+	s.HotelStore.RefreshRooms(ctx, room.HotelID, bson.M{"rooms": room.ID})
 	return room, err
 }
 

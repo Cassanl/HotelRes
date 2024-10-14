@@ -11,52 +11,69 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const dburi = "mongodb://localhost:27017"
+var (
+	client     *mongo.Client
+	hotelStore db.HotelStore
+	roomStore  db.RoomStore
+	ctx        = context.Background()
+)
 
-func main() {
-	ctx := context.Background()
-
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(dburi))
+func init() {
+	var err error
+	client, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBURI))
 	if err != nil {
 		log.Fatal(err)
 	}
-	hotelStore := db.NewMongoHotelStore(client, db.DBNAME)
-	roomStore := db.NewMongoRoomStore(client, db.DBNAME)
+	hotelStore = db.NewMongoHotelStore(client, db.DBNAME)
+	roomStore = db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
 
-	hotelStore.Drop(ctx)
-	roomStore.Drop(ctx)
+	if err := hotelStore.Drop(ctx); err != nil {
+		log.Fatal(err)
+	}
+	if err := roomStore.Drop(ctx); err != nil {
+		log.Fatal(err)
+	}
+}
 
+func seedHotel(name, location string) {
 	hotel := &types.Hotel{
-		Name:     "SeasideAndalucia",
-		Location: "Spain",
+		Name:     name,
+		Location: location,
 		Rooms:    []primitive.ObjectID{},
 	}
+
+	res, err := hotelStore.Insert(ctx, hotel)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	rooms := []types.Room{
 		{
+			HotelID:   res.ID,
 			Kind:      types.SingleRoomKind,
 			BasePrice: 99.9,
 		},
 		{
+			HotelID:   res.ID,
 			Kind:      types.SeaSideRoomType,
 			BasePrice: 199.9,
 		},
 		{
+			HotelID:   res.ID,
 			Kind:      types.DeluxeRoomKind,
 			BasePrice: 199.9,
 		},
 	}
 
-	resHotel, err := hotelStore.Insert(ctx, hotel)
-	if err != nil {
-		panic(err)
-	}
-	_ = resHotel
-
 	for _, room := range rooms {
-		res, err := roomStore.InsertRoom(ctx, &room)
+		_, err := roomStore.InsertRoom(ctx, &room)
 		if err != nil {
 			panic(err)
 		}
-		_ = res
 	}
+}
+
+func main() {
+	seedHotel("Lacrustine", "Valencia")
+	seedHotel("Al'Franco", "Madrid")
 }

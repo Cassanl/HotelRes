@@ -54,7 +54,7 @@ func (s *MongoUserStore) List(ctx context.Context) ([]*types.User, error) {
 	}
 	var users []*types.User
 	if err := cur.All(ctx, &users); err != nil {
-		return []*types.User{}, nil
+		return nil, err
 	}
 	return users, nil
 }
@@ -74,11 +74,10 @@ func (s *MongoUserStore) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
-	res, err := s.coll.DeleteOne(ctx, bson.M{"_id": oid})
+	_, err = s.coll.DeleteOne(ctx, bson.M{"_id": oid})
 	if err != nil {
 		return err
 	}
-	_ = res //TODO whe could handle the case when the use is not deleted (res == 0)
 	return nil
 }
 
@@ -92,11 +91,10 @@ func (s *MongoUserStore) Update(
 		return err
 	}
 	update := bson.D{{Key: "$set", Value: updateValues.ToBson()}}
-	res, err := s.coll.UpdateOne(ctx, bson.M{"_id": oid}, update)
+	_, err = s.coll.UpdateOne(ctx, bson.M{"_id": oid}, update)
 	if err != nil {
 		return err
 	}
-	_ = res //TODO could check results to see if db documents are modified or not
 	return nil
 }
 

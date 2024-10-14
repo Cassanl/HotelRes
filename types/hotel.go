@@ -20,6 +20,15 @@ type UpdateHotelParams struct {
 
 func (params UpdateHotelParams) ToBson() bson.M {
 	result := bson.M{}
+	if len(params.Name) > 0 {
+		result["name"] = params.Name
+	}
+	if len(params.Location) > 0 {
+		result["location"] = params.Location
+	}
+	if len(params.Rooms) > 0 {
+		result["rooms"] = params.Rooms
+	}
 	return result
 }
 
