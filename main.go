@@ -15,12 +15,7 @@ import (
 
 const dburi = "mongodb://localhost:27017"
 
-var (
-	client *mongo.Client
-	app    *fiber.App
-)
-
-var withConf = fiber.Config{
+var appConf = fiber.Config{
 	ErrorHandler: func(c *fiber.Ctx, err error) error {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return c.JSON(map[string]string{"error": "no match"})
@@ -29,26 +24,31 @@ var withConf = fiber.Config{
 	},
 }
 
-func init() {
-	var err error
-
-	client, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(dburi))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	app = fiber.New(withConf)
-}
-
 func main() {
 	listenAddr := flag.String("listenAddr", ":5000", "Api server's listen address")
 	flag.Parse()
 
-	apiv1 := app.Group("/api/v1")
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(dburi))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var (
+		app   = fiber.New(appConf)
+		apiv1 = app.Group("/api/v1")
+
+		userStore  = db.NewMongoUserStore(client, db.DBNAME)
+		hotelStore = db.NewMongoHotelStore(client, db.DBNAME)
+		roomStore  = db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
+
+		userHandler  = api.NewUserHandler(userStore)
+		hotelHandler = api.NewHotelHandler(hotelStore, roomStore)
+	)
+
 	apiv1.Get("/ping", handlePing)
 
-	registerUserEndpoints(apiv1)
-	registerHotelEndpoints(apiv1)
+	registerUserEndpoints(apiv1, userHandler)
+	registerHotelEndpoints(apiv1, hotelHandler)
 
 	app.Listen(*listenAddr)
 }
@@ -57,10 +57,7 @@ func handlePing(c *fiber.Ctx) error {
 	return c.JSON(map[string]string{"ping": "ping"})
 }
 
-func registerUserEndpoints(router fiber.Router) {
-	userStore := db.NewMongoUserStore(client, db.DBNAME)
-	userHandler := api.NewUserHandler(userStore)
-
+func registerUserEndpoints(router fiber.Router, userHandler *api.UserHandler) {
 	userRoutes := router.Group("/users")
 
 	userRoutes.Get("/", userHandler.HandleGetUsers)
@@ -68,11 +65,7 @@ func registerUserEndpoints(router fiber.Router) {
 	userRoutes.Post("/", userHandler.HandlePostUser)
 }
 
-func registerHotelEndpoints(router fiber.Router) {
-	hotelStore := db.NewMongoHotelStore(client, db.DBNAME)
-	roomStore := db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
-	hotelHandler := api.NewHotelHandler(hotelStore, roomStore)
-
+func registerHotelEndpoints(router fiber.Router, hotelHandler *api.HotelHandler) {
 	hotelRoutes := router.Group("/hotels")
 
 	hotelRoutes.Get("/", hotelHandler.HandleGetHotels)
