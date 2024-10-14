@@ -18,7 +18,6 @@ tasks:
     cmds:
     - go test -v -count=1 -race ./tests
   # add commit message as parameter
-  # needs PAT https://$(cat)@github.com/Cassanl/HotelRes.git
   vcs:
     cmds:
       - git add .
