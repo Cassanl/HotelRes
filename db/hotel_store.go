@@ -45,7 +45,7 @@ func (s *MongoHotelStore) Update(ctx context.Context, id string, updateValues ty
 	if err != nil {
 		return err
 	}
-	update := bson.D{{Key: "$set", Value: updateValues.ToBson()}}
+	update := bson.D{{Key: "$push", Value: updateValues.ToBson()}}
 	res, err := s.coll.UpdateOne(ctx, bson.M{"_id": oid}, update)
 	if err != nil {
 		return err

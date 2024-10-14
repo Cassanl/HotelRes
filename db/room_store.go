@@ -20,6 +20,8 @@ type RoomStore interface {
 type MongoRoomStore struct {
 	client *mongo.Client
 	coll   *mongo.Collection
+
+	HotelStore
 }
 
 func NewMongoRoomStore(c *mongo.Client, dbName string) *MongoRoomStore {
@@ -36,7 +38,9 @@ func (s *MongoRoomStore) InsertRoom(ctx context.Context, room *types.Room) (*typ
 	}
 	room.ID = res.InsertedID.(primitive.ObjectID)
 
-	// update hotel with room id
+	// TODO
+
+	s.HotelStore.Update(ctx, room.HotelID.Hex(), nil)
 	return room, err
 }
 

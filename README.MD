@@ -1,16 +1,19 @@
-;; mongodb \
-; docs \
+## mongodb \
+---
+### docs \
 - https://www.mongodb.com/docs/drivers/go/current/ 
-; client \
+### client \
 - go get go.mongodb.org/mongo-driver/mongo
 \
-;; fiber \
-; docs \
+## fiber \
+---
+### docs \
 https://gofiber.io/ \
-; install \
+### install \
 - go get -u github.com/gofiber/fiber/v2 
 \
-;; TODO
+## TODO \
+---
 - users     -> book room from hotel
 - admin     -> check reservations/bookings
 - Auth/Authz

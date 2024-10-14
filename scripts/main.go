@@ -6,6 +6,7 @@ import (
 	"hoteRes/types"
 	"log"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -28,6 +29,7 @@ func main() {
 	hotel := &types.Hotel{
 		Name:     "SeasideAndalucia",
 		Location: "Spain",
+		Rooms:    []primitive.ObjectID{},
 	}
 	rooms := []types.Room{
 		{
