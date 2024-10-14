@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"hoteRes/types"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,11 +15,11 @@ const userColl = "users"
 type UserStore interface {
 	Dropper
 
-	GetUserById(context.Context, string) (*types.User, error)
-	GetUsers(context.Context) ([]*types.User, error)
-	InsertUser(context.Context, *types.User) (*types.User, error)
-	DeleteUser(context.Context, string) error
-	UpdateUser(context.Context, string, types.UpdateUserParams) error
+	GetById(context.Context, string) (*types.User, error)
+	List(context.Context) ([]*types.User, error)
+	Insert(context.Context, *types.User) (*types.User, error)
+	Delete(context.Context, string) error
+	Update(context.Context, string, types.UpdateUserParams) error
 }
 
 type MongoUserStore struct {
@@ -33,7 +34,7 @@ func NewMongoUserStore(c *mongo.Client, dbName string) *MongoUserStore {
 	}
 }
 
-func (s *MongoUserStore) GetUserById(ctx context.Context, id string) (*types.User, error) {
+func (s *MongoUserStore) GetById(ctx context.Context, id string) (*types.User, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -46,7 +47,7 @@ func (s *MongoUserStore) GetUserById(ctx context.Context, id string) (*types.Use
 	return &user, nil
 }
 
-func (s *MongoUserStore) GetUsers(ctx context.Context) ([]*types.User, error) {
+func (s *MongoUserStore) List(ctx context.Context) ([]*types.User, error) {
 	cur, err := s.coll.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
@@ -58,7 +59,7 @@ func (s *MongoUserStore) GetUsers(ctx context.Context) ([]*types.User, error) {
 	return users, nil
 }
 
-func (s *MongoUserStore) InsertUser(ctx context.Context, user *types.User) (*types.User, error) {
+func (s *MongoUserStore) Insert(ctx context.Context, user *types.User) (*types.User, error) {
 	res, err := s.coll.InsertOne(ctx, user)
 	if err != nil {
 		return nil, err
@@ -67,7 +68,7 @@ func (s *MongoUserStore) InsertUser(ctx context.Context, user *types.User) (*typ
 	return user, nil
 }
 
-func (s *MongoUserStore) DeleteUser(ctx context.Context, id string) error {
+func (s *MongoUserStore) Delete(ctx context.Context, id string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
@@ -81,7 +82,7 @@ func (s *MongoUserStore) DeleteUser(ctx context.Context, id string) error {
 	return nil
 }
 
-func (s *MongoUserStore) UpdateUser(
+func (s *MongoUserStore) Update(
 	ctx context.Context,
 	id string,
 	updateValues types.UpdateUserParams) error {
@@ -100,6 +101,6 @@ func (s *MongoUserStore) UpdateUser(
 }
 
 func (s *MongoUserStore) Drop(ctx context.Context) error {
-	// drop user collection
-	return nil
+	fmt.Println("[INFO] dropping 'users' collection")
+	return s.coll.Drop(ctx)
 }

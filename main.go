@@ -14,8 +14,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const dburi = "mongodb://localhost:27017"
-
 var withConf = fiber.Config{
 	ErrorHandler: func(c *fiber.Ctx, err error) error {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -26,7 +24,7 @@ var withConf = fiber.Config{
 }
 
 func main() {
-	mongo, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(dburi))
+	mongo, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBNAME))
 	if err != nil {
 		log.Fatal(err)
 	}

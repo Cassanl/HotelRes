@@ -19,7 +19,7 @@ func NewUserHandler(userStore db.UserStore) *UserHandler {
 
 func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 	id := c.Params("id")
-	user, err := h.userStore.GetUserById(c.Context(), id)
+	user, err := h.userStore.GetById(c.Context(), id)
 	if err != nil {
 		return err
 	}
@@ -27,7 +27,7 @@ func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 }
 
 func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
-	users, err := h.userStore.GetUsers(c.Context())
+	users, err := h.userStore.List(c.Context())
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	insertedUser, err := h.userStore.InsertUser(c.Context(), user)
+	insertedUser, err := h.userStore.Insert(c.Context(), user)
 	if err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 
 func (h *UserHandler) HandleDeleteUser(c *fiber.Ctx) error {
 	id := c.Params("id")
-	if err := h.userStore.DeleteUser(c.Context(), id); err != nil {
+	if err := h.userStore.Delete(c.Context(), id); err != nil {
 		return err
 	}
 	return c.JSON(map[string]string{"deleted": id})
@@ -69,7 +69,7 @@ func (h *UserHandler) HandlePutUser(c *fiber.Ctx) error {
 	if err := c.BodyParser(&updateValues); err != nil {
 		return err
 	}
-	if err := h.userStore.UpdateUser(c.Context(), id, updateValues); err != nil {
+	if err := h.userStore.Update(c.Context(), id, updateValues); err != nil {
 		return err
 	}
 	return c.JSON(map[string]string{"updated": id})

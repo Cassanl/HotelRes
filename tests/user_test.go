@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"hoteRes/api"
 	"hoteRes/db"
 	"hoteRes/types"
@@ -15,36 +16,32 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const (
-	dburi      = "mongodb://localhost:27017"
-	dbtestName = "hotel-res-test"
-)
-
 type testdb struct {
-	db.UserStore
+	store db.UserStore
 }
 
 func (tdb *testdb) teardown(t *testing.T) {
-	if err := tdb.Drop(context.Background()); err != nil {
+	if err := tdb.store.Drop(context.Background()); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func setupEnv(t *testing.T) *testdb {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(dburi))
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBURI))
 	if err != nil {
 		t.Fatal(err)
 	}
-	return &testdb{UserStore: db.NewMongoUserStore(client, dbtestName)}
+	return &testdb{store: db.NewMongoUserStore(client, db.TEST_DBNAME)}
 }
 
+// TODO: currently broken
 func TestUserApi(t *testing.T) {
 	tdb := setupEnv(t)
 	defer tdb.teardown(t)
 
 	app := fiber.New()
-	userHandler := api.NewUserHandler(tdb.UserStore)
-	app.Post("/", userHandler.HandlePostUser)
+	userHandler := api.NewUserHandler(tdb.store)
+	app.Post("/api/v1/users", userHandler.HandlePostUser)
 
 	params := types.CreateUserParams{
 		Email:     "test@test.com",
@@ -53,13 +50,18 @@ func TestUserApi(t *testing.T) {
 		Password:  "Superstrongpwd",
 	}
 
-	b, _ := json.Marshal(params)
+	b, err := json.Marshal(params)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	req := httptest.NewRequest("POST", "/", bytes.NewReader(b))
-	req.Header.Add("Content-Type", "application/json")
-	resp, _ := app.Test(req)
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	t.Log(resp)
+	req := httptest.NewRequest("POST", "/api/v1/users", bytes.NewReader(b))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := app.Test(req, -1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("%+v\n", resp)
+	fmt.Println(resp.Status)
 }
