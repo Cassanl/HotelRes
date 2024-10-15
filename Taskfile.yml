@@ -12,7 +12,7 @@ tasks:
   
   seed:
     cmds:
-    - go run ./scripts/main.go
+    - go run ./scripts/seed.go
 
   test:
     cmds:

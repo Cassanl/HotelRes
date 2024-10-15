@@ -12,10 +12,9 @@ import (
 )
 
 var (
-	client     *mongo.Client
-	hotelStore db.HotelStore
-	roomStore  db.RoomStore
-	ctx        = context.Background()
+	client *mongo.Client
+	store  db.Store
+	ctx    = context.Background()
 )
 
 func init() {
@@ -24,13 +23,26 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	hotelStore = db.NewMongoHotelStore(client)
-	roomStore = db.NewMongoRoomStore(client, hotelStore)
 
-	if err := hotelStore.Drop(ctx); err != nil {
+	var (
+		userStore  = db.NewMongoUserStore(client)
+		hotelStore = db.NewMongoHotelStore(client)
+		roomStore  = db.NewMongoRoomStore(client, hotelStore)
+	)
+
+	store = db.Store{
+		Users:  userStore,
+		Hotels: hotelStore,
+		Rooms:  roomStore,
+	}
+
+	if err := store.Hotels.Drop(ctx); err != nil {
 		log.Fatal(err)
 	}
-	if err := roomStore.Drop(ctx); err != nil {
+	if err := store.Rooms.Drop(ctx); err != nil {
+		log.Fatal(err)
+	}
+	if err := store.Users.Drop(ctx); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -42,7 +54,7 @@ func seedHotel(name, location string) {
 		Rooms:    []primitive.ObjectID{},
 	}
 
-	res, err := hotelStore.Insert(ctx, hotel)
+	res, err := store.Hotels.Insert(ctx, hotel)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,14 +81,32 @@ func seedHotel(name, location string) {
 	}
 
 	for _, room := range rooms {
-		_, err := roomStore.InsertRoom(ctx, &room)
+		_, err := store.Rooms.InsertRoom(ctx, &room)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 	}
+}
+
+func seedUser(fname, lname, email, pwsd string) {
+	user, err := types.NewUserFromParams(types.CreateUserParams{
+		FirstName: fname,
+		LastName:  lname,
+		Email:     email,
+		Password:  pwsd,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	if _, err = store.Users.Insert(ctx, user); err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 func main() {
 	seedHotel("Lacrustine", "Valencia")
 	seedHotel("Al'Franco", "Madrid")
+	seedUser("polo", "POLO", "test@test.com", "turbopolo")
+	seedUser("james", "JAMES", "james@james.com", "turbojames")
 }

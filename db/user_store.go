@@ -15,6 +15,8 @@ const userColl = "users"
 type UserStore interface {
 	Dropper
 
+	GetByFilter(context.Context, bson.M) (*types.User, error)
+
 	GetById(context.Context, string) (*types.User, error)
 	List(context.Context) ([]*types.User, error)
 	Insert(context.Context, *types.User) (*types.User, error)
@@ -34,12 +36,19 @@ func NewMongoUserStore(c *mongo.Client) *MongoUserStore {
 	}
 }
 
+func (s *MongoUserStore) GetByFilter(ctx context.Context, filter bson.M) (*types.User, error) {
+	var user types.User
+	if err := s.coll.FindOne(ctx, filter).Decode(&user); err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func (s *MongoUserStore) GetById(ctx context.Context, id string) (*types.User, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
-
 	var user types.User
 	if err := s.coll.FindOne(ctx, bson.M{"_id": oid}).Decode(&user); err != nil {
 		return nil, err
@@ -73,7 +82,6 @@ func (s *MongoUserStore) Delete(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-
 	_, err = s.coll.DeleteOne(ctx, bson.M{"_id": oid})
 	if err != nil {
 		return err
@@ -81,11 +89,7 @@ func (s *MongoUserStore) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (s *MongoUserStore) Update(
-	ctx context.Context,
-	id string,
-	updateValues types.UpdateUserParams) error {
-
+func (s *MongoUserStore) Update(ctx context.Context, id string, updateValues types.UpdateUserParams) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err

@@ -15,6 +15,7 @@ const hotelColl = "hotels"
 type HotelStore interface {
 	Dropper
 
+	GetByFilter(context.Context, bson.M) (*types.Hotel, error)
 	GetById(context.Context, string) (*types.Hotel, error)
 	Insert(context.Context, *types.Hotel) (*types.Hotel, error)
 	ListHotels(context.Context) ([]*types.Hotel, error)
@@ -32,6 +33,14 @@ func NewMongoHotelStore(c *mongo.Client) *MongoHotelStore {
 		client: c,
 		coll:   c.Database(DBNAME).Collection(hotelColl),
 	}
+}
+
+func (s *MongoHotelStore) GetByFilter(ctx context.Context, filter bson.M) (*types.Hotel, error) {
+	var hotel types.Hotel
+	if err := s.coll.FindOne(ctx, filter).Decode(&hotel); err != nil {
+		return nil, err
+	}
+	return &hotel, nil
 }
 
 func (s *MongoHotelStore) GetById(ctx context.Context, id string) (*types.Hotel, error) {

@@ -6,7 +6,6 @@ import (
 	"flag"
 	"hoteRes/api"
 	"hoteRes/db"
-	"hoteRes/middleware"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -35,9 +34,10 @@ func main() {
 	}
 
 	var (
-		app        = fiber.New(appConf)
-		baseapi    = app.Group("/api")
-		apiv1      = app.Group("/api/v1", middleware.JWTAuthentication)
+		app     = fiber.New(appConf)
+		baseapi = app.Group("/api")
+		// apiv1      = app.Group("/api/v1", middleware.JWTAuthentication)
+		apiv1      = app.Group("/api/v1")
 		userStore  = db.NewMongoUserStore(client)
 		hotelStore = db.NewMongoHotelStore(client)
 		roomStore  = db.NewMongoRoomStore(client, hotelStore)
