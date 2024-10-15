@@ -6,6 +6,7 @@ import (
 	"flag"
 	"hoteRes/api"
 	"hoteRes/db"
+	"hoteRes/middleware"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -34,18 +35,25 @@ func main() {
 	}
 
 	var (
-		app   = fiber.New(appConf)
-		apiv1 = app.Group("/api/v1")
-
-		userStore  = db.NewMongoUserStore(client, db.DBNAME)
-		hotelStore = db.NewMongoHotelStore(client, db.DBNAME)
-		roomStore  = db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
-
+		app        = fiber.New(appConf)
+		baseapi    = app.Group("/api")
+		apiv1      = app.Group("/api/v1", middleware.JWTAuthentication)
+		userStore  = db.NewMongoUserStore(client)
+		hotelStore = db.NewMongoHotelStore(client)
+		roomStore  = db.NewMongoRoomStore(client, hotelStore)
+		store      = &db.Store{
+			Users:  userStore,
+			Hotels: hotelStore,
+			Rooms:  roomStore,
+		}
 		userHandler  = api.NewUserHandler(userStore)
-		hotelHandler = api.NewHotelHandler(hotelStore, roomStore)
+		hotelHandler = api.NewHotelHandler(store)
+		authHandler  = api.NewAuthHandler(store)
 	)
 
 	apiv1.Get("/ping", handlePing)
+
+	registerAuthEndpoint(baseapi, authHandler)
 
 	registerUserEndpoints(apiv1, userHandler)
 	registerHotelEndpoints(apiv1, hotelHandler)
@@ -69,4 +77,12 @@ func registerHotelEndpoints(router fiber.Router, hotelHandler *api.HotelHandler)
 	hotelRoutes := router.Group("/hotels")
 
 	hotelRoutes.Get("/", hotelHandler.HandleGetHotels)
+	hotelRoutes.Get("/:id", hotelHandler.HandleGetHotel)
+	hotelRoutes.Get("/:id/rooms", hotelHandler.HandleGetRooms)
+}
+
+func registerAuthEndpoint(router fiber.Router, authHandler *api.AuthHandler) {
+	authRoutes := router.Group("/auth")
+
+	authRoutes.Post("/", authHandler.HandleAuthenticate)
 }

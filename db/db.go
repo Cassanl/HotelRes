@@ -11,3 +11,9 @@ const (
 type Dropper interface {
 	Drop(context.Context) error
 }
+
+type Store struct {
+	Users  UserStore
+	Hotels HotelStore
+	Rooms  RoomStore
+}

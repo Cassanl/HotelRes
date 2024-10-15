@@ -15,6 +15,7 @@ const hotelColl = "hotels"
 type HotelStore interface {
 	Dropper
 
+	GetById(context.Context, string) (*types.Hotel, error)
 	Insert(context.Context, *types.Hotel) (*types.Hotel, error)
 	ListHotels(context.Context) ([]*types.Hotel, error)
 	Update(context.Context, string, types.UpdateHotelParams) error
@@ -26,11 +27,23 @@ type MongoHotelStore struct {
 	coll   *mongo.Collection
 }
 
-func NewMongoHotelStore(c *mongo.Client, dbName string) *MongoHotelStore {
+func NewMongoHotelStore(c *mongo.Client) *MongoHotelStore {
 	return &MongoHotelStore{
 		client: c,
-		coll:   c.Database(dbName).Collection(hotelColl),
+		coll:   c.Database(DBNAME).Collection(hotelColl),
 	}
+}
+
+func (s *MongoHotelStore) GetById(ctx context.Context, id string) (*types.Hotel, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	var hotel types.Hotel
+	if err := s.coll.FindOne(ctx, bson.M{"_id": oid}).Decode(&hotel); err != nil {
+		return nil, err
+	}
+	return &hotel, nil
 }
 
 func (s *MongoHotelStore) Insert(ctx context.Context, hotel *types.Hotel) (*types.Hotel, error) {
@@ -49,7 +62,6 @@ func (s *MongoHotelStore) ListHotels(ctx context.Context) ([]*types.Hotel, error
 	}
 	var hotels []*types.Hotel
 	if err := cur.All(ctx, &hotels); err != nil {
-		// TODO cannot decode array in objectid
 		return nil, err
 	}
 	return hotels, nil

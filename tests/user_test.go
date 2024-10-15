@@ -31,7 +31,8 @@ func setupEnv(t *testing.T) *testdb {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return &testdb{store: db.NewMongoUserStore(client, db.TEST_DBNAME)}
+	// TODO env test
+	return &testdb{store: db.NewMongoUserStore(client)}
 }
 
 // TODO: currently broken

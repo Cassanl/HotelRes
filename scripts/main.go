@@ -24,8 +24,8 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	hotelStore = db.NewMongoHotelStore(client, db.DBNAME)
-	roomStore = db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
+	hotelStore = db.NewMongoHotelStore(client)
+	roomStore = db.NewMongoRoomStore(client, hotelStore)
 
 	if err := hotelStore.Drop(ctx); err != nil {
 		log.Fatal(err)
@@ -49,19 +49,22 @@ func seedHotel(name, location string) {
 
 	rooms := []types.Room{
 		{
-			HotelID:   res.ID,
-			Kind:      types.SingleRoomKind,
-			BasePrice: 99.9,
+			HotelID: res.ID,
+			Size:    "small",
+			Seaside: false,
+			Price:   99.9,
 		},
 		{
-			HotelID:   res.ID,
-			Kind:      types.SeaSideRoomType,
-			BasePrice: 199.9,
+			HotelID: res.ID,
+			Size:    "medium",
+			Seaside: true,
+			Price:   199.9,
 		},
 		{
-			HotelID:   res.ID,
-			Kind:      types.DeluxeRoomKind,
-			BasePrice: 199.9,
+			HotelID: res.ID,
+			Size:    "deluxe",
+			Seaside: true,
+			Price:   299.9,
 		},
 	}
 

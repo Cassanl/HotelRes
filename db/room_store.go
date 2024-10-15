@@ -16,6 +16,7 @@ type RoomStore interface {
 	Dropper
 
 	InsertRoom(context.Context, *types.Room) (*types.Room, error)
+	ListRooms(context.Context, bson.M) ([]*types.Room, error)
 }
 
 type MongoRoomStore struct {
@@ -25,10 +26,10 @@ type MongoRoomStore struct {
 	HotelStore
 }
 
-func NewMongoRoomStore(c *mongo.Client, dbName string, hs HotelStore) *MongoRoomStore {
+func NewMongoRoomStore(c *mongo.Client, hs HotelStore) *MongoRoomStore {
 	return &MongoRoomStore{
 		client:     c,
-		coll:       c.Database(dbName).Collection(roomColl),
+		coll:       c.Database(DBNAME).Collection(roomColl),
 		HotelStore: hs,
 	}
 }
@@ -42,6 +43,18 @@ func (s *MongoRoomStore) InsertRoom(ctx context.Context, room *types.Room) (*typ
 
 	s.HotelStore.RefreshRooms(ctx, room.HotelID, bson.M{"rooms": room.ID})
 	return room, err
+}
+
+func (s *MongoRoomStore) ListRooms(ctx context.Context, filter bson.M) ([]*types.Room, error) {
+	cur, err := s.coll.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	var rooms []*types.Room
+	if err := cur.All(ctx, &rooms); err != nil {
+		return nil, err
+	}
+	return rooms, nil
 }
 
 func (s *MongoRoomStore) Drop(ctx context.Context) error {
