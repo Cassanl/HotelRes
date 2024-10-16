@@ -13,32 +13,22 @@ import (
 )
 
 type AuthHandler struct {
-	store *db.Store
+	store db.UserStore
 }
 
-func NewAuthHandler(store *db.Store) *AuthHandler {
+func NewAuthHandler(store db.UserStore) *AuthHandler {
 	return &AuthHandler{
 		store: store,
 	}
 }
 
-type AuthParams struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type AuthResponse struct {
-	User  *types.User `json:"user"`
-	Token string      `json:"token"`
-}
-
 func (h *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
-	var authParams AuthParams
+	var authParams types.AuthParams
 	if err := c.BodyParser(&authParams); err != nil {
 		return err
 	}
 
-	user, err := h.store.Users.GetByFilter(c.Context(), bson.M{"email": authParams.Email})
+	user, err := h.store.GetByFilter(c.Context(), bson.M{"email": authParams.Email})
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return fmt.Errorf("invalid credentials")
@@ -51,10 +41,9 @@ func (h *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 	}
 
 	tokenStr := middleware.CreateTokenFromUser(user)
-	authResponse := AuthResponse{
-		User:  user,
-		Token: tokenStr,
-	}
 
-	return c.JSON(authResponse)
+	c.Response().Header.Set("Authorization", tokenStr)
+	c.Response().SetStatusCode(fiber.StatusNoContent)
+
+	return nil
 }

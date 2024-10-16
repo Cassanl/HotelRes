@@ -49,7 +49,7 @@ func main() {
 		}
 		userHandler  = api.NewUserHandler(userStore)
 		hotelHandler = api.NewHotelHandler(store)
-		authHandler  = api.NewAuthHandler(store)
+		authHandler  = api.NewAuthHandler(userStore)
 	)
 
 	apiv1.Get("/ping", handlePing)
