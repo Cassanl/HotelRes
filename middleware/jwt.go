@@ -2,21 +2,23 @@ package middleware
 
 import (
 	"fmt"
+	"hoteRes/types"
+	"log"
 	"os"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 func JWTAuthentication(c *fiber.Ctx) error {
-	token, ok := c.GetReqHeaders()["X-Api-Token"]
-	if !ok {
+	token := c.Get("X-Api-Token")
+	if len(token) == 0 {
 		return fmt.Errorf("unauthorized")
 	}
-	if err := parseToken(token[0]); err != nil {
+	if err := parseToken(token); err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -36,8 +38,24 @@ func parseToken(tokenStr string) error {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Println(claims["foo"], claims["nbf"])
+		fmt.Printf("%+v\n", claims)
+		return nil
 	}
 
 	return fmt.Errorf("unauthorized")
+}
+
+func CreateTokenFromUser(user *types.User) string {
+	claims := jwt.MapClaims{
+		"sub":   user.ID,
+		"admin": false,
+		"exp":   time.Now().Add(time.Hour * 24).Unix(),
+		"iat":   time.Now().UTC().Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenStr, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return tokenStr
 }

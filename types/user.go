@@ -53,6 +53,11 @@ func (params CreateUserParams) Validate() map[string]string {
 	return errs
 }
 
+// func isValidEmail(email string) bool {
+// 	re := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+// 	return re.MatchString(email)
+// }
+
 type UpdateUserParams struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
@@ -69,10 +74,6 @@ func (params UpdateUserParams) ToBson() bson.M {
 	return result
 }
 
-type UpdateUserPassword string
-
-type UpdateUserEmail string
-
 type User struct {
 	ID                primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	FirstName         string             `bson:"firstName" json:"firstName"`
@@ -81,12 +82,6 @@ type User struct {
 	EncryptedPassword string             `bson:"encryptedPassword" json:"-"`
 }
 
-// type DbUser struct {
-// 	ID                primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-// 	FirstName         string             `bson:"firstName" json:"firstName"`
-// 	LastName          string             `bson:"lastName" json:"lastName"`
-// 	Email             string             `bson:"email" json:"email"`
-// 	EncryptedPassword string             `bson:"encryptedPassword" json:"-"`
-// 	CreatedAt         time.Time
-// 	UpdatedAt         time.Time
-// }
+func IsValidPassword(encpw, pw string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(encpw), []byte(pw)) == nil
+}
