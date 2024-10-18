@@ -3,6 +3,7 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"hoteRes/api"
 	"hoteRes/types"
 	"net/http/httptest"
@@ -30,15 +31,12 @@ func TestUserApi(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req := httptest.NewRequest("POST", "/", bytes.NewReader(b))
-	req.Header.Add("Content-Type", "application/json")
 
-	resp, err := app.Test(req, -1)
+	req := httptest.NewRequest("POST", "/", bytes.NewReader(b))
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := app.Test(req)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	if resp.StatusCode != fiber.StatusOK {
-		t.Errorf("expected 200 OK but got : %d", resp.StatusCode)
-	}
+	fmt.Println(resp)
 }

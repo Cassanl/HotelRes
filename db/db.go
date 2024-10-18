@@ -14,7 +14,8 @@ type Dropper interface {
 }
 
 type Store struct {
-	Users  UserStore
-	Hotels HotelStore
-	Rooms  RoomStore
+	Users    UserStore
+	Hotels   HotelStore
+	Rooms    RoomStore
+	Bookings BookingStore
 }

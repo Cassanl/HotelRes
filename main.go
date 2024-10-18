@@ -35,13 +35,15 @@ func main() {
 	}
 
 	var (
-		userStore  = db.NewMongoUserStore(client)
-		hotelStore = db.NewMongoHotelStore(client)
-		roomStore  = db.NewMongoRoomStore(client, hotelStore)
-		store      = &db.Store{
-			Users:  userStore,
-			Hotels: hotelStore,
-			Rooms:  roomStore,
+		userStore    = db.NewMongoUserStore(client)
+		hotelStore   = db.NewMongoHotelStore(client)
+		roomStore    = db.NewMongoRoomStore(client, hotelStore)
+		bookingStore = db.NewBookingStore(client)
+		store        = &db.Store{
+			Users:    userStore,
+			Hotels:   hotelStore,
+			Rooms:    roomStore,
+			Bookings: bookingStore,
 		}
 		app          = fiber.New(appConf)
 		baseapi      = app.Group("/api")
