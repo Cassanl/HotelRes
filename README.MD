@@ -6,12 +6,16 @@
 
 ## fiber 
 ### docs 
-https://gofiber.io/ 
+- https://gofiber.io/ 
 ### install 
 - go get -u github.com/gofiber/fiber/v2 
 
+## jwt
+### docs
+- https://pkg.go.dev/github.com/golang-jwt/jwt/v5
+### install
+- go get -u github.com/golang-jwt/jwt/v5
+
 ## TODO 
-- users     -> book room from hotel
-- admin     -> check reservations/bookings
-- Auth/Authz
-- scripts   -> migration, seeding
+- booking
+- fix tests (error 500 on fiber Test)
