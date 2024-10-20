@@ -45,22 +45,26 @@ func main() {
 			Rooms:    roomStore,
 			Bookings: bookingStore,
 		}
-		app          = fiber.New(appConf)
-		baseapi      = app.Group("/api")
-		apiv1        = app.Group("/api/v1", middleware.JWTAuthentication(userStore))
-		userHandler  = api.NewUserHandler(userStore)
-		hotelHandler = api.NewHotelHandler(store)
-		authHandler  = api.NewAuthHandler(userStore)
-		roomHandler  = api.NewRoomHandler(store)
+		app            = fiber.New(appConf)
+		baseRouter     = app.Group("/api")
+		v1Router       = baseRouter.Group("/v1", middleware.JWTAuthentication(userStore))
+		adminRouter    = v1Router.Group("/admin", middleware.AdminAuth)
+		userHandler    = api.NewUserHandler(userStore)
+		hotelHandler   = api.NewHotelHandler(store)
+		authHandler    = api.NewAuthHandler(userStore)
+		roomHandler    = api.NewRoomHandler(store)
+		bookingHandler = api.NewBookingHandler(store)
 	)
 
-	apiv1.Get("/ping", handlePing)
+	v1Router.Get("/ping", handlePing)
 
-	registerAuthEndpoint(baseapi, authHandler)
+	registerAuthEndpoint(baseRouter, authHandler)
 
-	registerUserEndpoints(apiv1, userHandler)
-	registerHotelEndpoints(apiv1, hotelHandler)
-	registerRoomEndpoints(apiv1, roomHandler)
+	registerUserEndpoints(v1Router, userHandler)
+	registerHotelEndpoints(v1Router, hotelHandler)
+	registerRoomEndpoints(v1Router, roomHandler)
+
+	registerBookingEndpoints(adminRouter, bookingHandler)
 
 	app.Listen(*listenAddr)
 }
@@ -88,11 +92,20 @@ func registerHotelEndpoints(router fiber.Router, hotelHandler *api.HotelHandler)
 func registerRoomEndpoints(router fiber.Router, roomHandler *api.RoomHandler) {
 	roomRoutes := router.Group("/rooms")
 
-	roomRoutes.Post("/:id/book", roomHandler.HandleBook)
+	roomRoutes.Post("/:id/book", roomHandler.HandleBooking)
+	roomRoutes.Delete("/:id/cancel", roomHandler.HandleCancelBooking)
 }
 
 func registerAuthEndpoint(router fiber.Router, authHandler *api.AuthHandler) {
 	authRoutes := router.Group("/auth")
 
 	authRoutes.Post("/", authHandler.HandleAuthenticate)
+}
+
+// TODO admin authz
+func registerBookingEndpoints(router fiber.Router, bookingHandler *api.BookingHandler) {
+	bookingRoutes := router.Group("/bookings")
+
+	bookingRoutes.Get("/", bookingHandler.HandleGetBookings)
+	bookingRoutes.Get("/:id", bookingHandler.HandleGetBooking)
 }

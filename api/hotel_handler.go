@@ -20,11 +20,10 @@ func NewHotelHandler(store *db.Store) *HotelHandler {
 }
 
 func (h *HotelHandler) HandleGetHotels(c *fiber.Ctx) error {
-	var qparams types.HotelQueryParams
-	if err := c.QueryParser(&qparams); err != nil {
-		return err
-	}
-	qparams.ToFilter()
+	// var params types.HotelQueryParams
+	// if err := c.QueryParser(&params); err != nil {
+	// 	return err
+	// }
 
 	hotels, err := h.store.Hotels.ListHotels(c.Context())
 	if err != nil {
@@ -39,8 +38,7 @@ func (h *HotelHandler) HandleGetRooms(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	filter := bson.M{"hotelID": oid}
-	rooms, err := h.store.Rooms.ListRooms(c.Context(), filter)
+	rooms, err := h.store.Rooms.ListByFilter(c.Context(), types.Filter{"_id": oid})
 	if err != nil {
 		return err
 	}

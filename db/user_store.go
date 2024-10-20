@@ -15,7 +15,7 @@ const userColl = "users"
 type UserStore interface {
 	Dropper
 
-	GetByFilter(context.Context, map[string]any) (*types.User, error) // ???
+	GetByFilter(context.Context, types.Filter) (*types.User, error) // ???
 
 	GetById(context.Context, string) (*types.User, error)
 	List(context.Context) ([]*types.User, error)
@@ -36,7 +36,7 @@ func NewMongoUserStore(c *mongo.Client) *MongoUserStore {
 	}
 }
 
-func (s *MongoUserStore) GetByFilter(ctx context.Context, filters map[string]any) (*types.User, error) {
+func (s *MongoUserStore) GetByFilter(ctx context.Context, filters types.Filter) (*types.User, error) {
 	var user types.User
 	if err := s.coll.FindOne(ctx, filters).Decode(&user); err != nil {
 		return nil, err

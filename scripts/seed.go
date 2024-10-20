@@ -81,7 +81,7 @@ func seedHotel(name, location string) {
 	}
 
 	for _, room := range rooms {
-		_, err := store.Rooms.InsertRoom(ctx, &room)
+		_, err := store.Rooms.Insert(ctx, &room)
 		if err != nil {
 			log.Fatal(err)
 		}

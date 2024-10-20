@@ -15,8 +15,8 @@ const roomColl = "rooms"
 type RoomStore interface {
 	Dropper
 
-	InsertRoom(context.Context, *types.Room) (*types.Room, error)
-	ListRooms(context.Context, bson.M) ([]*types.Room, error)
+	Insert(context.Context, *types.Room) (*types.Room, error)
+	ListByFilter(context.Context, types.Filter) ([]*types.Room, error)
 }
 
 type MongoRoomStore struct {
@@ -34,7 +34,7 @@ func NewMongoRoomStore(c *mongo.Client, hs HotelStore) *MongoRoomStore {
 	}
 }
 
-func (s *MongoRoomStore) InsertRoom(ctx context.Context, room *types.Room) (*types.Room, error) {
+func (s *MongoRoomStore) Insert(ctx context.Context, room *types.Room) (*types.Room, error) {
 	res, err := s.coll.InsertOne(ctx, room)
 	if err != nil {
 		return nil, err
@@ -45,8 +45,8 @@ func (s *MongoRoomStore) InsertRoom(ctx context.Context, room *types.Room) (*typ
 	return room, err
 }
 
-func (s *MongoRoomStore) ListRooms(ctx context.Context, filter bson.M) ([]*types.Room, error) {
-	cur, err := s.coll.Find(ctx, filter)
+func (s *MongoRoomStore) ListByFilter(ctx context.Context, filters types.Filter) ([]*types.Room, error) {
+	cur, err := s.coll.Find(ctx, filters)
 	if err != nil {
 		return nil, err
 	}

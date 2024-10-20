@@ -10,26 +10,10 @@ type ResponseKind string
 
 const (
 	ErrorResp ResponseKind = "Error"
+	OkResp    ResponseKind = "OK"
 )
 
 type GenericResponse struct {
-	Kind   ResponseKind
-	Status int
+	Kind ResponseKind
+	Msg  string
 }
-
-// type Constraint func(any) error
-
-// type Validator struct {
-// 	model       any
-// 	Constraints map[string]Constraint
-// }
-
-// func (v *Validator) Validate() map[string]error {
-// 	errs := map[string]error{}
-// 	for key, constraint := range v.Constraints {
-// 		if err := constraint(v.model); err != nil {
-// 			errs[key] = err
-// 		}
-// 	}
-// 	return errs
-// }

@@ -8,7 +8,6 @@ import (
 	"hoteRes/types"
 
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -28,7 +27,7 @@ func (h *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 		return err
 	}
 
-	user, err := h.store.GetByFilter(c.Context(), bson.M{"email": authParams.Email})
+	user, err := h.store.GetByFilter(c.Context(), types.Filter{"email": authParams.Email})
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return fmt.Errorf("invalid credentials")

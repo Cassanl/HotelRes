@@ -39,12 +39,6 @@ type HotelQueryParams struct {
 	MaxRating int
 }
 
-func (params *HotelQueryParams) ToFilter() error {
-	// TODO zero values are an issues (eg maxrating at 0)
-	// fmt.Printf("%+v\n", params)
-	return nil
-}
-
 type Room struct {
 	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	Price   float64            `bson:"price" json:"price"`
