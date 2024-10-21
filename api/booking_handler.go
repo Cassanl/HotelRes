@@ -2,6 +2,7 @@ package api
 
 import (
 	"hoteRes/db"
+	"hoteRes/middleware"
 	"hoteRes/types"
 
 	"github.com/gofiber/fiber/v2"
@@ -16,6 +17,18 @@ func NewBookingHandler(store *db.Store) *BookingHandler {
 	return &BookingHandler{
 		store: store,
 	}
+}
+
+func (h *BookingHandler) HandleGetCurrentUserBookings(c *fiber.Ctx) error {
+	user, err := middleware.GetAuthenticatedUser(c)
+	if err != nil {
+		return err
+	}
+	bookings, err := h.store.Bookings.ListByFilter(c.Context(), types.Filter{"userID": user.ID})
+	if err != nil {
+		return err
+	}
+	return c.JSON(bookings)
 }
 
 func (h *BookingHandler) HandleGetBooking(c *fiber.Ctx) error {

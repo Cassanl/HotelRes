@@ -81,3 +81,11 @@ func CreateTokenFromUser(user *types.User) string {
 	}
 	return tokenStr
 }
+
+func GetAuthenticatedUser(c *fiber.Ctx) (*types.User, error) {
+	user, ok := c.Context().UserValue(types.UserKey).(*types.User)
+	if !ok {
+		return nil, fmt.Errorf("unauthorized")
+	}
+	return user, nil
+}

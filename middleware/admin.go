@@ -8,7 +8,7 @@ import (
 )
 
 func AdminAuth(c *fiber.Ctx) error {
-	user, ok := c.Context().UserValue(types.UserKey).(types.User)
+	user, ok := c.Context().UserValue(types.UserKey).(*types.User)
 	if !ok {
 		return fmt.Errorf("unauthorized")
 	}

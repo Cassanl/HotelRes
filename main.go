@@ -10,6 +10,7 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -20,6 +21,9 @@ var appConf = fiber.Config{
 	ErrorHandler: func(c *fiber.Ctx, err error) error {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return c.JSON(map[string]string{"error": "no match"})
+		}
+		if errors.Is(err, primitive.ErrInvalidHex) {
+			return c.JSON(map[string]string{"error": "invalid ID"})
 		}
 		return c.JSON(map[string]string{"error": err.Error()})
 	},
@@ -58,54 +62,28 @@ func main() {
 
 	v1Router.Get("/ping", handlePing)
 
-	registerAuthEndpoint(baseRouter, authHandler)
+	// ---------
+	baseRouter.Post("/auth", authHandler.HandleAuthenticate)
 
-	registerUserEndpoints(v1Router, userHandler)
-	registerHotelEndpoints(v1Router, hotelHandler)
-	registerRoomEndpoints(v1Router, roomHandler)
+	v1Router.Get("/", userHandler.HandleGetUsers)
+	v1Router.Get("/:id", userHandler.HandleGetUser)
+	v1Router.Post("/", userHandler.HandlePostUser)
 
-	registerBookingEndpoints(adminRouter, bookingHandler)
+	v1Router.Get("/", hotelHandler.HandleGetHotels)
+	v1Router.Get("/:id", hotelHandler.HandleGetHotel)
+	v1Router.Get("/:id/rooms", hotelHandler.HandleGetRooms)
+
+	v1Router.Post("/:id/book", roomHandler.HandleBooking)
+	v1Router.Delete("/:id", roomHandler.HandleCancelBooking)
+
+	v1Router.Get("/:id", bookingHandler.HandleGetCurrentUserBookings)
+	adminRouter.Get("/", bookingHandler.HandleGetBookings)
+	adminRouter.Get("/:id", bookingHandler.HandleGetBooking)
+	// ---------
 
 	app.Listen(*listenAddr)
 }
 
 func handlePing(c *fiber.Ctx) error {
 	return c.JSON(map[string]string{"ping": "ping"})
-}
-
-func registerUserEndpoints(router fiber.Router, userHandler *api.UserHandler) {
-	userRoutes := router.Group("/users")
-
-	userRoutes.Get("/", userHandler.HandleGetUsers)
-	userRoutes.Get("/:id", userHandler.HandleGetUser)
-	userRoutes.Post("/", userHandler.HandlePostUser)
-}
-
-func registerHotelEndpoints(router fiber.Router, hotelHandler *api.HotelHandler) {
-	hotelRoutes := router.Group("/hotels")
-
-	hotelRoutes.Get("/", hotelHandler.HandleGetHotels)
-	hotelRoutes.Get("/:id", hotelHandler.HandleGetHotel)
-	hotelRoutes.Get("/:id/rooms", hotelHandler.HandleGetRooms)
-}
-
-func registerRoomEndpoints(router fiber.Router, roomHandler *api.RoomHandler) {
-	roomRoutes := router.Group("/rooms")
-
-	roomRoutes.Post("/:id/book", roomHandler.HandleBooking)
-	roomRoutes.Delete("/:id/cancel", roomHandler.HandleCancelBooking)
-}
-
-func registerAuthEndpoint(router fiber.Router, authHandler *api.AuthHandler) {
-	authRoutes := router.Group("/auth")
-
-	authRoutes.Post("/", authHandler.HandleAuthenticate)
-}
-
-// TODO admin authz
-func registerBookingEndpoints(router fiber.Router, bookingHandler *api.BookingHandler) {
-	bookingRoutes := router.Group("/bookings")
-
-	bookingRoutes.Get("/", bookingHandler.HandleGetBookings)
-	bookingRoutes.Get("/:id", bookingHandler.HandleGetBooking)
 }

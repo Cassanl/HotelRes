@@ -1,13 +1,18 @@
-@base=localhost:5000/api
+@base=https://localhost:5000/api
 
 ### auth
+POST {{base}}/auth
+Content-Type: application/json
+
 {
 	"email": "test@test.com",
 	"password": "turbopolo"
 }
 
 ### book a room
-POST @base/v1/rooms/6714c73a7681bb7aad7cbc7b/book
+POST {{base}}/v1/rooms/6714c73a7681bb7aad7cbc7b/book
+Content-Type: application/json
+
 {
 	"nbPersons": 1,
 	"from": "2024-10-28T00:00:00Z",
