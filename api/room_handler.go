@@ -5,6 +5,7 @@ import (
 	"hoteRes/db"
 	"hoteRes/types"
 	"net/http"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -70,7 +71,6 @@ func (h *RoomHandler) HandleBooking(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// TODO
 func (h *RoomHandler) HandleCancelBooking(c *fiber.Ctx) error {
 	oid, err := primitive.ObjectIDFromHex(c.Params("id"))
 	if err != nil {
@@ -93,13 +93,17 @@ func (h *RoomHandler) HandleCancelBooking(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := h.store.Bookings.Delete(c.Context(), oid.String()); err != nil {
+	id := types.Filter{"_id": oid}
+	filters := types.Filter{
+		"cancelledAt": time.Now(),
+	}
+	if err := h.store.Bookings.Update(c.Context(), id, filters); err != nil {
 		return err
 	}
 
 	return c.Status(http.StatusOK).JSON(types.GenericResponse{
 		Kind: types.OkResp,
-		Msg:  "can",
+		Msg:  "booking cancelled",
 	})
 }
 

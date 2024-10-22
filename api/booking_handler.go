@@ -19,6 +19,7 @@ func NewBookingHandler(store *db.Store) *BookingHandler {
 	}
 }
 
+// TODO response null
 func (h *BookingHandler) HandleGetCurrentUserBookings(c *fiber.Ctx) error {
 	user, err := middleware.GetAuthenticatedUser(c)
 	if err != nil {

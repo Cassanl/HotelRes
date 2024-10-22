@@ -65,20 +65,20 @@ func main() {
 	// ---------
 	baseRouter.Post("/auth", authHandler.HandleAuthenticate)
 
-	v1Router.Get("/", userHandler.HandleGetUsers)
-	v1Router.Get("/:id", userHandler.HandleGetUser)
-	v1Router.Post("/", userHandler.HandlePostUser)
+	v1Router.Get("/users", userHandler.HandleGetUsers)
+	v1Router.Get("/users/:id", userHandler.HandleGetUser)
+	v1Router.Post("/users", userHandler.HandlePostUser)
 
-	v1Router.Get("/", hotelHandler.HandleGetHotels)
-	v1Router.Get("/:id", hotelHandler.HandleGetHotel)
-	v1Router.Get("/:id/rooms", hotelHandler.HandleGetRooms)
+	v1Router.Get("/hotels", hotelHandler.HandleGetHotels)
+	v1Router.Get("/hotels/:id", hotelHandler.HandleGetHotel)
+	v1Router.Get("/hotels/:id/rooms", hotelHandler.HandleGetRooms)
 
-	v1Router.Post("/:id/book", roomHandler.HandleBooking)
-	v1Router.Delete("/:id", roomHandler.HandleCancelBooking)
+	v1Router.Post("/rooms/:id/book", roomHandler.HandleBooking)
+	v1Router.Delete("/rooms/:id", roomHandler.HandleCancelBooking)
 
-	v1Router.Get("/:id", bookingHandler.HandleGetCurrentUserBookings)
-	adminRouter.Get("/", bookingHandler.HandleGetBookings)
-	adminRouter.Get("/:id", bookingHandler.HandleGetBooking)
+	v1Router.Get("/bookings/", bookingHandler.HandleGetCurrentUserBookings)
+	adminRouter.Get("/bookings", bookingHandler.HandleGetBookings)
+	adminRouter.Get("/bookings/:id", bookingHandler.HandleGetBooking)
 	// ---------
 
 	app.Listen(*listenAddr)

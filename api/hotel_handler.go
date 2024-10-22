@@ -38,7 +38,7 @@ func (h *HotelHandler) HandleGetRooms(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	rooms, err := h.store.Rooms.ListByFilter(c.Context(), types.Filter{"_id": oid})
+	rooms, err := h.store.Rooms.ListByFilter(c.Context(), types.Filter{"hotelID": oid})
 	if err != nil {
 		return err
 	}

@@ -19,6 +19,7 @@ type BookingStore interface {
 	ListByFilter(context.Context, types.Filter) ([]*types.Booking, error)
 	GetByFilter(context.Context, types.Filter) (*types.Booking, error)
 	Delete(context.Context, string) error
+	Update(context.Context, types.Filter, types.Filter) error
 }
 
 type MongoBookingStore struct {
@@ -69,6 +70,14 @@ func (s *MongoBookingStore) Delete(ctx context.Context, id string) error {
 	}
 	_, err = s.coll.DeleteOne(ctx, bson.M{"_id": oid})
 	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *MongoBookingStore) Update(ctx context.Context, id types.Filter, updateValues types.Filter) error {
+	update := bson.D{{Key: "$set", Value: updateValues}}
+	if _, err := s.coll.UpdateByID(ctx, id, update); err != nil {
 		return err
 	}
 	return nil

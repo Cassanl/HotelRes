@@ -7,13 +7,13 @@ import (
 )
 
 type Booking struct {
-	ID         primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	UserId     primitive.ObjectID `bson:"userID,omitempty" json:"userID,omitempty"`
-	RoomId     primitive.ObjectID `bson:"roomID,omitempty" json:"roomID,omitempty"`
-	NbPersons  uint               `bson:"nbPersons" json:"nbPersons"`
-	From       time.Time          `bson:"from" json:"from"`
-	To         time.Time          `bson:"to" json:"to"`
-	CanceledAt time.Time          `bson:"canceledAt" json:"canceledAt"`
+	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	UserId      primitive.ObjectID `bson:"userID,omitempty" json:"userID,omitempty"`
+	RoomId      primitive.ObjectID `bson:"roomID,omitempty" json:"roomID,omitempty"`
+	NbPersons   uint               `bson:"nbPersons" json:"nbPersons"`
+	From        time.Time          `bson:"from" json:"from"`
+	To          time.Time          `bson:"to" json:"to"`
+	CancelledAt time.Time          `bson:"cancelledAt" json:"cancelledAt"`
 }
 
 type BookingParams struct {
@@ -42,3 +42,24 @@ func NewBookingFromParams(params BookingParams, userID, roomID primitive.ObjectI
 		To:        params.From,
 	}
 }
+
+// type UpdateBookingParams struct {
+// 	NbPersons uint      `json:"nbPersons"`
+// 	From      time.Time `json:"from"`
+// 	To        time.Time `json:"to"`
+// }
+
+// func (params UpdateBookingParams) Validate() map[string]string {
+// 	errs := map[string]string{}
+// 	if params.From.Before(time.Now()) {
+// 		errs["from"] = "invalid From date : book before today"
+// 	}
+// 	if params.To.Before(params.From) {
+// 		errs["to"] = "invalid To date : end date before start date"
+// 	}
+// 	return errs
+// }
+
+// func (params UpdateBookingParams) ToFilter() Filter {
+
+// }

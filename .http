@@ -9,6 +9,11 @@ Content-Type: application/json
 	"password": "turbopolo"
 }
 
+{
+	"email": "james@james.com",
+	"password": "turbojames"
+}
+
 ### book a room
 POST {{base}}/v1/rooms/6714c73a7681bb7aad7cbc7b/book
 Content-Type: application/json
