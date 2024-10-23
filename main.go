@@ -65,20 +65,25 @@ func main() {
 	// ---------
 	baseRouter.Post("/auth", authHandler.HandleAuthenticate)
 
-	v1Router.Get("/users", userHandler.HandleGetUsers)
-	v1Router.Get("/users/:id", userHandler.HandleGetUser)
-	v1Router.Post("/users", userHandler.HandlePostUser)
-
 	v1Router.Get("/hotels", hotelHandler.HandleGetHotels)
 	v1Router.Get("/hotels/:id", hotelHandler.HandleGetHotel)
+	// TODO generic filter
 	v1Router.Get("/hotels/:id/rooms", hotelHandler.HandleGetRooms)
 
-	v1Router.Post("/rooms/:id/book", roomHandler.HandleBooking)
-	v1Router.Delete("/rooms/:id", roomHandler.HandleCancelBooking)
+	v1Router.Get("/bookings", bookingHandler.HandleGetCurrentUserBookings)
+	v1Router.Post("/bookings", bookingHandler.HandlePostBooking)
+	v1Router.Delete("bookings/:id", bookingHandler.HandleCancelBooking)
 
-	v1Router.Get("/bookings/", bookingHandler.HandleGetCurrentUserBookings)
+	v1Router.Get("/rooms", roomHandler.HandleGetRooms)
+	v1Router.Get("/rooms/:id", roomHandler.HandleGetRoom)
+
+	adminRouter.Get("/users", userHandler.HandleGetUsers)
+	adminRouter.Get("/users/:id", userHandler.HandleGetUser)
+	adminRouter.Post("/users", userHandler.HandlePostUser)
+
 	adminRouter.Get("/bookings", bookingHandler.HandleGetBookings)
 	adminRouter.Get("/bookings/:id", bookingHandler.HandleGetBooking)
+	adminRouter.Delete("bookings/:id", bookingHandler.HandleDeleteBooking)
 	// ---------
 
 	app.Listen(*listenAddr)

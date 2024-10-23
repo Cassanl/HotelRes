@@ -77,7 +77,7 @@ func (s *MongoBookingStore) Delete(ctx context.Context, id string) error {
 
 func (s *MongoBookingStore) Update(ctx context.Context, id types.Filter, updateValues types.Filter) error {
 	update := bson.D{{Key: "$set", Value: updateValues}}
-	if _, err := s.coll.UpdateByID(ctx, id, update); err != nil {
+	if _, err := s.coll.UpdateOne(ctx, id, update); err != nil {
 		return err
 	}
 	return nil

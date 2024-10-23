@@ -19,7 +19,8 @@ POST {{base}}/v1/rooms/6714c73a7681bb7aad7cbc7b/book
 Content-Type: application/json
 
 {
-	"nbPersons": 1,
-	"from": "2024-10-28T00:00:00Z",
-	"to": "2024-10-29T00:00:00Z"
+	"roomID":		"67189d749b7d68faf24fd084",
+	"nbPersons": 	1,
+	"from": 		"2024-10-28T00:00:00Z",
+	"to": 			"2024-10-29T00:00:00Z"
 }

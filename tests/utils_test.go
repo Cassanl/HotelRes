@@ -23,6 +23,9 @@ func (tdb *TestDB) Teardown(t *testing.T) {
 	if err := tdb.store.Hotels.Drop(context.Background()); err != nil {
 		t.Fatal(err)
 	}
+	if err := tdb.store.Bookings.Drop(context.Background()); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func SetupEnv(t *testing.T) *TestDB {
@@ -32,14 +35,16 @@ func SetupEnv(t *testing.T) *TestDB {
 	}
 
 	var (
-		userStore  = db.NewMongoUserStore(client)
-		hotelStore = db.NewMongoHotelStore(client)
-		roomStore  = db.NewMongoRoomStore(client, hotelStore)
+		userStore    = db.NewMongoUserStore(client)
+		hotelStore   = db.NewMongoHotelStore(client)
+		roomStore    = db.NewMongoRoomStore(client, hotelStore)
+		bookingStore = db.NewBookingStore(client)
 	)
 
 	return &TestDB{store: &db.Store{
-		Users:  userStore,
-		Hotels: hotelStore,
-		Rooms:  roomStore,
+		Users:    userStore,
+		Hotels:   hotelStore,
+		Rooms:    roomStore,
+		Bookings: bookingStore,
 	}}
 }

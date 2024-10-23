@@ -25,15 +25,17 @@ func init() {
 	}
 
 	var (
-		userStore  = db.NewMongoUserStore(client)
-		hotelStore = db.NewMongoHotelStore(client)
-		roomStore  = db.NewMongoRoomStore(client, hotelStore)
+		userStore    = db.NewMongoUserStore(client)
+		hotelStore   = db.NewMongoHotelStore(client)
+		roomStore    = db.NewMongoRoomStore(client, hotelStore)
+		bookingStore = db.NewBookingStore(client)
 	)
 
 	store = db.Store{
-		Users:  userStore,
-		Hotels: hotelStore,
-		Rooms:  roomStore,
+		Users:    userStore,
+		Hotels:   hotelStore,
+		Rooms:    roomStore,
+		Bookings: bookingStore,
 	}
 
 	if err := store.Hotels.Drop(ctx); err != nil {
@@ -43,6 +45,9 @@ func init() {
 		log.Fatal(err)
 	}
 	if err := store.Users.Drop(ctx); err != nil {
+		log.Fatal(err)
+	}
+	if err := store.Bookings.Drop(ctx); err != nil {
 		log.Fatal(err)
 	}
 }
