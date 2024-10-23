@@ -2,15 +2,13 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"hoteRes/api"
 	"hoteRes/db"
-	"hoteRes/middleware"
 	"log"
+	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -19,13 +17,11 @@ const dburi = "mongodb://localhost:27017"
 
 var appConf = fiber.Config{
 	ErrorHandler: func(c *fiber.Ctx, err error) error {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return c.JSON(map[string]string{"error": "no match"})
+		if err, ok := err.(api.Error); ok {
+			return c.Status(err.Code).JSON(err)
 		}
-		if errors.Is(err, primitive.ErrInvalidHex) {
-			return c.JSON(map[string]string{"error": "invalid ID"})
-		}
-		return c.JSON(map[string]string{"error": err.Error()})
+		apiErr := api.NewError(http.StatusInternalServerError, "an error occurred")
+		return c.Status(apiErr.Code).JSON(apiErr)
 	},
 }
 
@@ -51,8 +47,8 @@ func main() {
 		}
 		app            = fiber.New(appConf)
 		baseRouter     = app.Group("/api")
-		v1Router       = baseRouter.Group("/v1", middleware.JWTAuthentication(userStore))
-		adminRouter    = v1Router.Group("/admin", middleware.AdminAuth)
+		v1Router       = baseRouter.Group("/v1", api.JWTAuthentication(userStore))
+		adminRouter    = v1Router.Group("/admin", api.AdminAuth)
 		userHandler    = api.NewUserHandler(userStore)
 		hotelHandler   = api.NewHotelHandler(store)
 		authHandler    = api.NewAuthHandler(userStore)

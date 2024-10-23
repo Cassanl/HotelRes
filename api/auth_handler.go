@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"hoteRes/db"
-	"hoteRes/middleware"
 	"hoteRes/types"
 
 	"github.com/gofiber/fiber/v2"
@@ -39,7 +38,7 @@ func (h *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 		return fmt.Errorf("invalid credentials")
 	}
 
-	tokenStr := middleware.CreateTokenFromUser(user)
+	tokenStr := CreateTokenFromUser(user)
 
 	c.Response().Header.Set("Authorization", tokenStr)
 	c.Response().SetStatusCode(fiber.StatusNoContent)

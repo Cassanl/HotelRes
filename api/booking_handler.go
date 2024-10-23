@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"hoteRes/db"
-	"hoteRes/middleware"
 	"hoteRes/types"
+	"net/http"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -33,10 +33,7 @@ func (h *BookingHandler) HandlePostBooking(c *fiber.Ctx) error {
 
 	user, ok := c.Context().UserValue(types.UserKey).(*types.User)
 	if !ok {
-		return c.Status(fiber.StatusUnauthorized).JSON(types.GenericResponse{
-			Kind: types.ErrorResp,
-			Msg:  "unauthorized",
-		})
+		return ErrUnauthorized()
 	}
 
 	booked, err := h.isBooked(c.Context(), params)
@@ -44,10 +41,7 @@ func (h *BookingHandler) HandlePostBooking(c *fiber.Ctx) error {
 		return err
 	}
 	if booked {
-		return c.Status(fiber.StatusBadRequest).JSON(types.GenericResponse{
-			Kind: types.ErrorResp,
-			Msg:  "room is already booked for this period",
-		})
+		return NewError(http.StatusBadRequest, "room already booked")
 	}
 
 	booking := types.NewBookingFromParams(params, user.ID)
@@ -91,7 +85,7 @@ func (h *BookingHandler) HandleDeleteBooking(c *fiber.Ctx) error {
 }
 
 func (h *BookingHandler) HandleGetCurrentUserBookings(c *fiber.Ctx) error {
-	user, err := middleware.GetAuthenticatedUser(c)
+	user, err := GetAuthenticatedUser(c)
 	if err != nil {
 		return err
 	}
