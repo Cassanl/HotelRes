@@ -20,7 +20,7 @@ var appConf = fiber.Config{
 		if err, ok := err.(api.Error); ok {
 			return c.Status(err.Code).JSON(err)
 		}
-		apiErr := api.NewError(http.StatusInternalServerError, "an error occurred")
+		apiErr := api.NewError(http.StatusInternalServerError, err.Error())
 		return c.Status(apiErr.Code).JSON(apiErr)
 	},
 }
@@ -38,7 +38,7 @@ func main() {
 		userStore    = db.NewMongoUserStore(client)
 		hotelStore   = db.NewMongoHotelStore(client)
 		roomStore    = db.NewMongoRoomStore(client, hotelStore)
-		bookingStore = db.NewBookingStore(client)
+		bookingStore = db.NewMongoBookingStore(client)
 		store        = &db.Store{
 			Users:    userStore,
 			Hotels:   hotelStore,

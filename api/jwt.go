@@ -16,7 +16,7 @@ func JWTAuthentication(userStore db.UserStore) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		token := c.Get("X-Api-Token")
 		if len(token) == 0 {
-			return fmt.Errorf("unauthorized")
+			return ErrUnauthorized()
 		}
 
 		claims, err := validateToken(token)
@@ -28,13 +28,13 @@ func JWTAuthentication(userStore db.UserStore) fiber.Handler {
 		expUtc := time.Unix(exp, 0).UTC()
 		nowUtc := time.Now().UTC()
 		if nowUtc.After(expUtc) {
-			return fmt.Errorf("unauthorized")
+			return ErrUnauthorized()
 		}
 
 		userID := claims["id"].(string)
 		user, err := userStore.GetById(c.Context(), userID)
 		if err != nil {
-			return fmt.Errorf("unauthorized")
+			return ErrUnauthorized()
 		}
 
 		c.Context().SetUserValue(types.UserKey, user)
@@ -52,16 +52,16 @@ func validateToken(tokenStr string) (jwt.MapClaims, error) {
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("unauthorized")
+		return nil, ErrUnauthorized()
 	}
 
 	if !token.Valid {
-		return nil, fmt.Errorf("unauthorized")
+		return nil, ErrUnauthorized()
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, fmt.Errorf("unauthorized")
+		return nil, ErrUnauthorized()
 	}
 
 	return claims, nil
@@ -85,7 +85,7 @@ func CreateTokenFromUser(user *types.User) string {
 func GetAuthenticatedUser(c *fiber.Ctx) (*types.User, error) {
 	user, ok := c.Context().UserValue(types.UserKey).(*types.User)
 	if !ok {
-		return nil, fmt.Errorf("unauthorized")
+		return nil, ErrUnauthorized()
 	}
 	return user, nil
 }
