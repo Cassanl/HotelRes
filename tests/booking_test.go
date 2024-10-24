@@ -18,7 +18,8 @@ import (
 func TestBookingApi(t *testing.T) {
 	var (
 		tdb            = SetupEnv(t)
-		app            = fiber.New()
+		conf           = fiber.Config{ErrorHandler: api.GlobalErrorHandler}
+		app            = fiber.New(conf)
 		bookingHandler = api.NewBookingHandler(tdb.store)
 		authHandler    = api.NewAuthHandler(tdb.store.Users)
 	)

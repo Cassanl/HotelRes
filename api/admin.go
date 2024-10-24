@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"hoteRes/types"
 
 	"github.com/gofiber/fiber/v2"
@@ -10,10 +9,10 @@ import (
 func AdminAuth(c *fiber.Ctx) error {
 	user, ok := c.Context().UserValue(types.UserKey).(*types.User)
 	if !ok {
-		return fmt.Errorf("unauthorized")
+		return ErrUnauthorized()
 	}
 	if !user.IsAdmin {
-		return fmt.Errorf("unauthorized")
+		return ErrUnauthorized()
 	}
 	return c.Next()
 }

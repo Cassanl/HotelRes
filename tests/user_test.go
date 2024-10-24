@@ -12,11 +12,14 @@ import (
 )
 
 func TestUserApi(t *testing.T) {
-	tdb := SetupEnv(t)
+	var (
+		tdb         = SetupEnv(t)
+		conf        = fiber.Config{ErrorHandler: api.GlobalErrorHandler}
+		app         = fiber.New(conf)
+		userHandler = api.NewUserHandler(tdb.store.Users)
+	)
 	defer tdb.Teardown(t)
 
-	app := fiber.New()
-	userHandler := api.NewUserHandler(tdb.store.Users)
 	app.Post("/", userHandler.HandlePostUser)
 
 	params := types.CreateUserParams{

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/mail"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,6 +14,15 @@ const (
 	minLastNameLen  = 2
 	minPasswordLen  = 7
 )
+
+type User struct {
+	ID                primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	FirstName         string             `bson:"firstName" json:"firstName"`
+	LastName          string             `bson:"lastName" json:"lastName"`
+	Email             string             `bson:"email" json:"email"`
+	EncryptedPassword string             `bson:"encryptedPassword" json:"-"`
+	IsAdmin           bool               `bson:"isAdmin" json:"-"`
+}
 
 type CreateUserParams struct {
 	FirstName string `json:"firstName"`
@@ -58,22 +66,13 @@ type UpdateUserParams struct {
 	LastName  string `json:"lastName"`
 }
 
-func (params UpdateUserParams) ToBson() bson.M {
-	result := bson.M{}
+func (params UpdateUserParams) ToFilter() Filter {
+	filters := Filter{}
 	if len(params.FirstName) > 0 {
-		result["firstName"] = params.FirstName
+		filters["firstName"] = params.FirstName
 	}
 	if len(params.LastName) > 0 {
-		result["lastName"] = params.LastName
+		filters["lastName"] = params.LastName
 	}
-	return result
-}
-
-type User struct {
-	ID                primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	FirstName         string             `bson:"firstName" json:"firstName"`
-	LastName          string             `bson:"lastName" json:"lastName"`
-	Email             string             `bson:"email" json:"email"`
-	EncryptedPassword string             `bson:"encryptedPassword" json:"-"`
-	IsAdmin           bool               `bson:"isAdmin" json:"-"`
+	return filters
 }

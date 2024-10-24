@@ -13,6 +13,7 @@ type TestDB struct {
 	store *db.Store
 }
 
+// TODO use separate db (like spin up a test container for mongo in dev env)
 func (tdb *TestDB) Teardown(t *testing.T) {
 	if err := tdb.store.Users.Drop(context.Background()); err != nil {
 		t.Fatal(err)

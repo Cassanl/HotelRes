@@ -17,6 +17,9 @@ tasks:
   test:
     cmds:
     - go test -v -count=1 -race ./tests
+  profile:
+    cmds:
+    - go test -v -count=1 -cpuprofile=cpu.prof -memprofile=mem.prof -bench=. ./tests
   # add commit message as parameter
   vcs:
     cmds:

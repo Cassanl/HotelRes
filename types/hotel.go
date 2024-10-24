@@ -1,7 +1,6 @@
 package types
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -19,8 +18,8 @@ type UpdateHotelParams struct {
 	Rating   int                  `bson:"rating" json:"rating"`
 }
 
-func (params UpdateHotelParams) ToBson() bson.M {
-	result := bson.M{}
+func (params UpdateHotelParams) ToFilter() Filter {
+	result := Filter{}
 	if len(params.Name) > 0 {
 		result["name"] = params.Name
 	}

@@ -94,7 +94,7 @@ func (s *MongoUserStore) Update(ctx context.Context, id string, updateValues typ
 	if err != nil {
 		return err
 	}
-	update := bson.D{{Key: "$set", Value: updateValues.ToBson()}}
+	update := bson.D{{Key: "$set", Value: updateValues.ToFilter()}}
 	_, err = s.coll.UpdateOne(ctx, bson.M{"_id": oid}, update)
 	if err != nil {
 		return err

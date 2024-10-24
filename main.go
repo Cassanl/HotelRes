@@ -6,7 +6,6 @@ import (
 	"hoteRes/api"
 	"hoteRes/db"
 	"log"
-	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,13 +15,7 @@ import (
 const dburi = "mongodb://localhost:27017"
 
 var appConf = fiber.Config{
-	ErrorHandler: func(c *fiber.Ctx, err error) error {
-		if err, ok := err.(api.Error); ok {
-			return c.Status(err.Code).JSON(err)
-		}
-		apiErr := api.NewError(http.StatusInternalServerError, err.Error())
-		return c.Status(apiErr.Code).JSON(apiErr)
-	},
+	ErrorHandler: api.GlobalErrorHandler,
 }
 
 func main() {
@@ -64,7 +57,7 @@ func main() {
 	v1Router.Get("/hotels", hotelHandler.HandleGetHotels)
 	v1Router.Get("/hotels/:id", hotelHandler.HandleGetHotel)
 	// TODO generic filter
-	v1Router.Get("/hotels/:id/rooms", hotelHandler.HandleGetRooms)
+	// v1Router.Get("/hotels/:id/rooms", hotelHandler.HandleGetRooms)
 
 	v1Router.Get("/bookings", bookingHandler.HandleGetCurrentUserBookings)
 	v1Router.Post("/bookings", bookingHandler.HandlePostBooking)
