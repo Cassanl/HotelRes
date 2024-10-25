@@ -5,7 +5,6 @@ import (
 	"hoteRes/types"
 
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -38,7 +37,7 @@ func (h *HotelHandler) HandleGetRooms(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	rooms, err := h.store.Rooms.ListByFilter(c.Context(), types.Filter{"hotelID": oid})
+	rooms, err := h.store.Rooms.ListByFilter(c.Context(), types.Map{"hotelID": oid})
 	if err != nil {
 		return err
 	}
@@ -52,7 +51,7 @@ func (h *HotelHandler) HandleGetHotel(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	hotel, err := h.store.Hotels.GetByFilter(c.Context(), bson.M{"_id": oid})
+	hotel, err := h.store.Hotels.GetByFilter(c.Context(), types.Map{"_id": oid})
 	if err != nil {
 		return err
 	}

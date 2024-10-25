@@ -59,18 +59,19 @@ func (h *BookingHandler) HandleCancelBooking(c *fiber.Ctx) error {
 		return err
 	}
 
-	filters := types.Filter{
+	filters := types.Map{
 		"cancelled":   true,
 		"cancelledAt": time.Now(),
 	}
-	if err := h.store.Bookings.Update(c.Context(), types.Filter{"_id": oid}, filters); err != nil {
+	if err := h.store.Bookings.Update(c.Context(), types.Map{"_id": oid}, filters); err != nil {
 		return err
 	}
 
-	return c.Status(fiber.StatusOK).JSON(types.GenericResponse{
-		Kind: types.OkResp,
-		Msg:  "booking cancelled",
-	})
+	resp := types.GenericResponse{
+		Status: http.StatusOK,
+		Msg:    "booking cancelled",
+	}
+	return c.Status(resp.Status).JSON(resp.Msg)
 }
 
 func (h *BookingHandler) HandleDeleteBooking(c *fiber.Ctx) error {
@@ -78,10 +79,12 @@ func (h *BookingHandler) HandleDeleteBooking(c *fiber.Ctx) error {
 	if err := h.store.Bookings.Delete(c.Context(), id); err != nil {
 		return err
 	}
-	return c.Status(fiber.StatusOK).JSON(types.GenericResponse{
-		Kind: types.OkResp,
-		Msg:  fmt.Sprintf("deleted %s", id),
-	})
+
+	resp := types.GenericResponse{
+		Status: http.StatusOK,
+		Msg:    fmt.Sprintf("deleted %s", id),
+	}
+	return c.Status(resp.Status).JSON(resp.Msg)
 }
 
 func (h *BookingHandler) HandleGetCurrentUserBookings(c *fiber.Ctx) error {
@@ -89,7 +92,7 @@ func (h *BookingHandler) HandleGetCurrentUserBookings(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	bookings, err := h.store.Bookings.ListByFilter(c.Context(), types.Filter{"userID": user.ID})
+	bookings, err := h.store.Bookings.ListByFilter(c.Context(), types.Map{"userID": user.ID})
 	if err != nil {
 		return err
 	}
@@ -101,7 +104,7 @@ func (h *BookingHandler) HandleGetBooking(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	booking, err := h.store.Bookings.GetByFilter(c.Context(), types.Filter{"_id": oid})
+	booking, err := h.store.Bookings.GetByFilter(c.Context(), types.Map{"_id": oid})
 	if err != nil {
 		return err
 	}
@@ -109,7 +112,7 @@ func (h *BookingHandler) HandleGetBooking(c *fiber.Ctx) error {
 }
 
 func (h *BookingHandler) HandleGetBookings(c *fiber.Ctx) error {
-	bookings, err := h.store.Bookings.ListByFilter(c.Context(), types.Filter{})
+	bookings, err := h.store.Bookings.ListByFilter(c.Context(), types.Map{})
 	if err != nil {
 		return err
 	}
@@ -117,12 +120,12 @@ func (h *BookingHandler) HandleGetBookings(c *fiber.Ctx) error {
 }
 
 func (h *BookingHandler) isBooked(ctx context.Context, params types.PostBookingParams) (bool, error) {
-	filters := types.Filter{
+	filters := types.Map{
 		"roomID": params.RoomID,
-		"from": types.Filter{
+		"from": types.Map{
 			"$gte": params.From,
 		},
-		"to": types.Filter{
+		"to": types.Map{
 			"$lte": params.To,
 		},
 	}

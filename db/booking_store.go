@@ -16,10 +16,10 @@ type BookingStore interface {
 	Dropper
 
 	Insert(context.Context, *types.Booking) (*types.Booking, error)
-	ListByFilter(context.Context, types.Filter) ([]*types.Booking, error)
-	GetByFilter(context.Context, types.Filter) (*types.Booking, error)
+	ListByFilter(context.Context, types.Map) ([]*types.Booking, error)
+	GetByFilter(context.Context, types.Map) (*types.Booking, error)
 	Delete(context.Context, string) error
-	Update(context.Context, types.Filter, types.Filter) error
+	Update(context.Context, types.Map, types.Map) error
 }
 
 type MongoBookingStore struct {
@@ -34,7 +34,7 @@ func NewMongoBookingStore(c *mongo.Client) *MongoBookingStore {
 	}
 }
 
-func (s *MongoBookingStore) GetByFilter(ctx context.Context, filters types.Filter) (*types.Booking, error) {
+func (s *MongoBookingStore) GetByFilter(ctx context.Context, filters types.Map) (*types.Booking, error) {
 	var booking types.Booking
 	if err := s.coll.FindOne(ctx, filters).Decode(&booking); err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (s *MongoBookingStore) GetByFilter(ctx context.Context, filters types.Filte
 	return &booking, nil
 }
 
-func (s *MongoBookingStore) ListByFilter(ctx context.Context, filters types.Filter) ([]*types.Booking, error) {
+func (s *MongoBookingStore) ListByFilter(ctx context.Context, filters types.Map) ([]*types.Booking, error) {
 	cur, err := s.coll.Find(ctx, filters)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (s *MongoBookingStore) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (s *MongoBookingStore) Update(ctx context.Context, id types.Filter, updateValues types.Filter) error {
+func (s *MongoBookingStore) Update(ctx context.Context, id types.Map, updateValues types.Map) error {
 	update := bson.D{{Key: "$set", Value: updateValues}}
 	if _, err := s.coll.UpdateOne(ctx, id, update); err != nil {
 		return err

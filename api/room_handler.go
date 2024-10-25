@@ -23,7 +23,7 @@ func (h *RoomHandler) HandleGetRoom(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	room, err := h.store.Rooms.GetByFilter(c.Context(), types.Filter{"_id": oid})
+	room, err := h.store.Rooms.GetByFilter(c.Context(), types.Map{"_id": oid})
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (h *RoomHandler) HandleGetRoom(c *fiber.Ctx) error {
 }
 
 func (h *RoomHandler) HandleGetRooms(c *fiber.Ctx) error {
-	rooms, err := h.store.Rooms.ListByFilter(c.Context(), types.Filter{})
+	rooms, err := h.store.Rooms.ListByFilter(c.Context(), types.Map{})
 	if err != nil {
 		return err
 	}

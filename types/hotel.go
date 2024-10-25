@@ -18,8 +18,8 @@ type UpdateHotelParams struct {
 	Rating   int                  `bson:"rating" json:"rating"`
 }
 
-func (params UpdateHotelParams) ToFilter() Filter {
-	result := Filter{}
+func (params UpdateHotelParams) ToDBMap() Map {
+	result := Map{}
 	if len(params.Name) > 0 {
 		result["name"] = params.Name
 	}

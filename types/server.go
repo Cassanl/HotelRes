@@ -1,6 +1,6 @@
 package types
 
-type Filter map[string]interface{}
+type Map map[string]interface{}
 
 const (
 	UserKey int = iota
@@ -8,12 +8,7 @@ const (
 
 type ResponseKind string
 
-const (
-	ErrorResp ResponseKind = "Error"
-	OkResp    ResponseKind = "OK"
-)
-
 type GenericResponse struct {
-	Kind ResponseKind
-	Msg  string
+	Status int
+	Msg    string
 }

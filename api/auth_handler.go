@@ -26,7 +26,7 @@ func (h *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 		return err
 	}
 
-	user, err := h.store.GetByFilter(c.Context(), types.Filter{"email": authParams.Email})
+	user, err := h.store.GetByFilter(c.Context(), types.Map{"email": authParams.Email})
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return fmt.Errorf("invalid credentials")

@@ -66,8 +66,8 @@ type UpdateUserParams struct {
 	LastName  string `json:"lastName"`
 }
 
-func (params UpdateUserParams) ToFilter() Filter {
-	filters := Filter{}
+func (params UpdateUserParams) ToFilter() Map {
+	filters := Map{}
 	if len(params.FirstName) > 0 {
 		filters["firstName"] = params.FirstName
 	}

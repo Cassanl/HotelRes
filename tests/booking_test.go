@@ -74,10 +74,7 @@ func TestBookingApi(t *testing.T) {
 
 	app.Get("/ping", func(c *fiber.Ctx) error {
 		t.Log("MONGO IS THE ISSUE")
-		return c.Status(http.StatusOK).JSON(types.GenericResponse{
-			Kind: types.OkResp,
-			Msg:  "OK MATE",
-		})
+		return c.Status(http.StatusOK).JSON("MONGO IS THE ISSUE")
 	})
 	testReq := httptest.NewRequest("GET", "/ping", bytes.NewReader(make([]byte, 10)))
 	resp, err := app.Test(testReq)
